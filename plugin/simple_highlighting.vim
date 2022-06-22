@@ -2,6 +2,7 @@ if exists("g:loaded_simple_highlighting")
   finish
 endif
 let g:loaded_simple_highlighting = 1
+let g:highlight_no = 0
 
 " Basic Functions {{{
 function NewArray(length, elemVal)
@@ -89,15 +90,15 @@ endfunction
 " http:/:vs
 " /vim.wikia.com/wiki/Highlight_multiple_words
 
-highlight hlg1 ctermbg=DarkGreen   guibg=DarkGreen      ctermfg=white guifg=white
-highlight hlg2 ctermbg=DarkCyan    guibg=DarkCyan       ctermfg=white guifg=white
-highlight hlg3 ctermbg=Blue        guibg=Blue           ctermfg=white guifg=white
-highlight hlg4 ctermbg=DarkMagenta guibg=DarkMagenta    ctermfg=white guifg=white
+highlight hlg1 ctermbg=DarkGreen   guibg=DarkGreen      ctermfg=black guifg=black
+highlight hlg2 ctermbg=208         guibg=Orange         ctermfg=white guifg=white
+highlight hlg3 ctermbg=Blue        guibg=Blue           ctermfg=black guifg=black
+highlight hlg4 ctermbg=DarkMagenta guibg=DarkMagenta    ctermfg=black guifg=black
 highlight hlg5 ctermbg=DarkRed     guibg=DarkRed        ctermfg=white guifg=white
-highlight hlg6 ctermbg=DarkYellow  guibg=DarkYellow     ctermfg=white guifg=white
+highlight hlg6 ctermbg=DarkYellow  guibg=DarkYellow     ctermfg=black guifg=black
 highlight hlg7 ctermbg=Brown       guibg=Brown          ctermfg=white guifg=white
 highlight hlg8 ctermbg=DarkGrey    guibg=DarkGrey       ctermfg=white guifg=white
-highlight hlg9 ctermbg=Black       guibg=Black          ctermfg=white guifg=white
+highlight hlg9 ctermbg=White       guibg=White          ctermfg=black guifg=black
 let s:TOTAL_HL_NUMBERS = 10
 
 let g:hlPat   = NewArray(s:TOTAL_HL_NUMBERS,[])  "stores the patters
@@ -192,20 +193,23 @@ function HighlightAddEscMagic(hlNum, pattern)
 endfunction
 
 function HighlightAdd(hlNum, pattern)
-    if a:hlNum == 0
-      let hlNum = g:hlDefaultNum
+    if (a:hlNum > 0)
+        let hlNum = a:hlNum
     else
-      let hlNum = a:hlNum
+        let g:highlight_no = g:highlight_no + 1
+        if (g:highlight_no >= s:TOTAL_HL_NUMBERS)
+           let g:highlight_no = 1
+        endif
+        let hlNum = g:highlight_no
     endif
+    echo 'higlightId: 'hlNum
     if (s:HighlightCheckNum(hlNum) != 0) &&( a:pattern != '') && (a:pattern != '\<\>')
         let prevSlotAndIdx = HighlightPatternInSlot(a:pattern)
         let prevHlNum = prevSlotAndIdx[0]
         let prevIdx   = prevSlotAndIdx[1]
         if prevHlNum != -1
             call HighlightRemovePatternAt(prevHlNum,prevIdx)
-            if prevHlNum == hlNum " was already at slot so do not add it back in
                 return 
-            endif
         endif
         let g:hlPat[hlNum] += [a:pattern]
         call WinDo('call s:HighlightUpdatePriv('.hlNum.')')
